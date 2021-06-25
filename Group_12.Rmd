@@ -77,6 +77,7 @@ Our approach is using confidence intervals.
 Firstly, we fit the most general model, i.e.$y_i = \alpha + \beta_1 x_{1i} + \beta_2 x_{2i}+ \beta_3 x_{3i}+ \beta_4 x_{4i}+ \epsilon_i$
 
 ```{r}
+#Fit the most general model and create a table about estimate summaries from it
 mlr.model1 <- lm(rainfall~tmax+tmin+af+sun, data = Paisley)
 get_regression_table(mlr.model1) %>% 
   knitr::kable(
@@ -87,9 +88,10 @@ get_regression_table(mlr.model1) %>%
   kable_styling(latex_options = "hold_position")
 ```
 
-All of the 95% CIs for the parameters in the model contain zero except that for af(-5.073,-2.305) and sun(-0.750,-0.324), therefore we can conclude that tmax and tmin does not contribute significantly to the model and thus remove them from the model and refit the model with af and sun.
+According to the \ref{reg1}, all of the 95% CIs for the parameters in the model contain zero except that for af(-5.073,-2.305) and sun(-0.750,-0.324), therefore we can conclude that tmax and tmin does not contribute significantly to the model and thus remove them from the model and refit the model with af and sun.
 
 ```{r}
+#Fit the MLR model after selecting variables and create a table about estimate summaries from it
 mlr.model2 <- lm(rainfall~af+sun, data = Paisley)
 get_regression_table(mlr.model2) %>% 
   knitr::kable(
@@ -100,12 +102,13 @@ get_regression_table(mlr.model2) %>%
   kable_styling(latex_options = "hold_position")
 ```
 
-So we choose the af and sun as our explanatory variables.
+So we choose the af and sun as our explanatory variables and estimate the model again.
 
 ### Model Comparisons
-Then we can check the conclusion by calculating $R^2_{adj}$,$AIC$ and $BIC$.
+Then we can check the conclusion by calculating some objective criterias such as $R^2_{adj}$,$AIC$ and $BIC$.
 
 ```{r}
+#Calculate some objective criterias and create a table about model comparison values for different models
 model.comp.values.mlr1<-glance(lm(rainfall~tmax+tmin+af+sun, data = Paisley))
 model.comp.values.mlr2<-glance(lm(rainfall~af+sun, data = Paisley))
 Models <- c('MLR(general)','MLR(refit)') 
@@ -114,15 +117,17 @@ bind_rows(model.comp.values.mlr1, model.comp.values.mlr2,.id="Model") %>%
   mutate(Model=Models) %>%  
   kable(
     digits = 2,
-    caption = "\\label{tab:comparison}Model comparison values for different models",
+    caption = "\\label{tab:comp}Model comparison values for different models",
     booktabs = TRUE)%>%
   kable_styling(latex_options = "hold_position")
 ```
 
-The refitted model has the same $R^2_{adj}$ value and lower $AIC$ and $BIC$ values. However, the high $AIC$ and $BIC$ values and very low $R^2_{adj}$ value could suggest that these models is not a good fit to the data.
+In the \ref{tab:com}, the refitted model has the same $R^2_{adj}$ value and lower $AIC$ and $BIC$ values. However, the high $AIC$ and $BIC$ values and very low $R^2_{adj}$ value could suggest that these models is not a good fit to the data.
 
 ## Linear Models
+
 ```{r}
+#Do a regression model with the selected variables and create a table about estimate summaries from it
 int.model <- lm(rainfall ~ (af+sun)  * half_year, data = Paisley)
 get_regression_table(int.model)%>%
   kable(
@@ -132,12 +137,13 @@ get_regression_table(int.model)%>%
   kable_styling(latex_options = "hold_position")
 ```
 
-Hence the regression line for the month in the first half year is given by:$$\widehat{Rainfall} = 161.39-3.28{\cdot}af-0.56{\cdot}sun$$
+The parameter estimates are in \\ref{tab:model}, hence the regression line for the month in the first half year is given by:$$\widehat{Rainfall} = 161.39-3.28{\cdot}af-0.56{\cdot}sun$$
 while the regression line for the month in the latter half year is given by:$$\widehat{Rainfall} = 185.24-3.96{\cdot}af-0.69{\cdot}sun$$
 
-To see the linear relationship between four variables, we plot scatterplots:
+To see the linear relationship between these variables, we plot scatterplots:
 
 ```{r}
+#Produce scatterplots of the relationship between the outcome variable and the explanatory variables
 ggplot(data=Paisley,mapping=aes(x=af,y=rainfall,group=half_year,color=half_year))+
   geom_point(alpha=0.6)+
   labs(x="Days of Air Frost (days)", y="Total Rainfall(mm)",
@@ -156,11 +162,14 @@ ggplot(data=Paisley,mapping=aes(x=sun,y=rainfall,
   
 ```
 
+According to the plot above, the linear relationship between the explanatory variables and outcome variables seems not obvious.
+
 ## Assessing Model fit
-We have to check our model assumptions.
-First, we need to plot the scatterplot of the residuals against credit af and sun:
+After producing the model, we shall check our model assumptions.
+First of all, we need to plot the scatterplot of the residuals against variables af and sun:
 
 ```{r}
+#Plot the scatterplot of the residuals against variables af and sun
 regression.points<-get_regression_points(int.model)
 ggplot(regression.points, aes(x = af, y = residual)) +
   geom_point(alpha=0.6) +
@@ -180,34 +189,45 @@ The plot shows that there is an even scatter of points above and below the zero 
 Then we plot the residuals against the fitted values:
 
 ```{r}
-ggplot(regression.points, aes(x = rainfall, y = residual)) +
+#Plot the residuals against the fitted values
+ggplot(regression.points, aes(x = rainfall_hat, y = residual)) +
   geom_point(alpha=0.6) +
   labs(x = "Fitted Values", y = "Residual",title="Residuals vs Fitted Values") +
   geom_hline(yintercept = 0, col = "blue", size = 1) +
   facet_wrap(~ half_year)
 ```
 
-In this case, the residuals don't have mean 0 and there appears to a systematic pattern in the residuals with the scatter of the residuals around the zero line not consistent.The assumptions of the residuals having mean zero and constant variability across all values of the explanatory variable do not appear to be valid. 
+In this case, the plot shows that there is an even scatter of points above and below the zero line indicating the residuals have mean zero. And the scattering of the points is also constant across all values of the explanatory variable
+with no systematic pattern observed in the residuals. So this assumption is also valid. 
+
+Then we need to check if the residuals follow the normal distribution.
 
 ```{r}
+#Plot histograms of the residuals by half_year
 ggplot(regression.points, aes(x = residual)) +
   geom_histogram( color = "white") +
   labs(x = "Residual") +
   facet_wrap(~half_year)
 ```
 
-Our subjective impression is that the residuals  appear to be bell-shaped.
+Our subjective impression is that the residuals  appear to be bell-shaped. It means the normality of the residuals is good.
 
-To conclude, the assumptions might not be valid in this model and the model might not be a good fit to the data.
+To conclude, the assumptions is valid in this model and the model is an appropriate fit to the data.
 
 ## CI for Regression Parameters
 CIs have been shown in Table \ref{tab:model}.
 
-## Futher Expansion
+## Conclusion
+Hence we built the regression model for the month in the first half year which is :$$\widehat{Rainfall} = 161.39-3.28{\cdot}af-0.56{\cdot}sun$$
+while the regression model for the month in the latter half year is :$$\widehat{Rainfall} = 185.24-3.96{\cdot}af-0.69{\cdot}sun$$
+We can use the model analyse and predict the rainfall in Paisley.
+
+## Futher Research
 As the variable tmax and tmin have very weak linear relationship with Rainfall, we want to find if there is a linear relationship between rainfall and the new variable td(temperature difference) produced by tmax and tmin.
 We can see the data and fitted model.
 
 ```{r}
+#Produce scatterplots of the relationship between the rainfall and new variables td.
 new_data <- Paisley%>%
   mutate(td=tmax-tmin)
 ggplot(new_data, aes(x = td, y = rainfall)) +
@@ -215,25 +235,27 @@ ggplot(new_data, aes(x = td, y = rainfall)) +
   labs(x = "Temperature Difference(degC)", y = "Total rainfall(mm)",title="Temperature Difference vs Total Rainfall") +
   geom_smooth(method = "lm", se = FALSE)
 ```
-We estimate the sampling distribution of the slope parameter $\hat{\beta}$ via the bootstrap method. And here we can view the bootstrap distribution as a histogram.
+
+We estimate the sampling distribution of the slope parameter $\hat{\beta}$ via the bootstrap method. And here we shall view the bootstrap distribution as a histogram.
 
 ```{r}
+#Produce bootstrap samples and plot a histogram of the bootstrap distribution
 bootstrap_beta_distn <- new_data %>% 
   specify(rainfall ~ td) %>%
   generate(reps = 1000, type = "bootstrap") %>% 
   calculate(stat = "slope")
 bootstrap_beta_distn %>% visualize()
 ```
-CI for the slope:
+
+Just as the plot shows, the the bootstrap distribution is bell-shaped and accord with what Central Limit Theorem predicted that the sampling distribution would be a normal distribution.
+Also we can calculate CI for the slope by the bootstrap method.
 
 ```{r}
-bootstrap_beta_distn %>% 
-  get_ci(level = 0.95, type = "percentile")%>%
-  kable(
-    digits = 2,
-    caption = "\\label{tab:new}95% confidence interval",
-    booktabs = TRUE)%>%
-  kable_styling(latex_options = "hold_position")
+#Constructing confidence intervals by bootstrap method and record the CI (-19.72,-14.62) we get at this moment
+percentile_ci<-bootstrap_beta_distn %>% 
+  get_ci()
 ```
 
-The 95% CI for the slope parameter is from -19.72 to -14.62 which doesn't contain zero, hence we could conclude there is a linear relationship and that for every degC the temperature difference the average rainfall decreases between 14.62 and 19.72 units.
+The 95% CI for the slope parameter in our bootstrap distribution is from -19.72 to -14.62 which doesn't contain zero, hence we could conclude there is a linear relationship and that for every degC the temperature difference the average rainfall decreases between 14.62 and 19.72 units.
+
+We can see an interesting phenomenon that although tmax and tmin has weak relationship with Rainfall, the temperature difference(tmax-tmin) has a statistically significant linear relationship with Rainfall.
