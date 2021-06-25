@@ -20,6 +20,8 @@ library(GGally)
 library(moderndive)
 library(kableExtra)
 library(plotly)
+library(gridExtra)
+library(tidyverse)
 ```
 
 ```{r data, echo = FALSE, eval = TRUE}
@@ -32,6 +34,42 @@ Paisley<-read.csv("Group_12.csv")
 
 ## Model Selection
 The data set has five continuous variables and one categorical variable, so I'll choose suitable continuous variables as explanatory variable at first as rainfall has been the response variable.
+
+```{r}
+#sunshine and rainfall
+p1<-ggplot(data=Paisley,mapping=aes(x=sun,y=rainfall,
+                                     group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Total Sunshine Duration(hours)", y="Total Rainfall(mm)",
+       title="Sunshine Duration vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 10))
+
+#tmax and rainfall
+p2<-ggplot(data=Paisley,mapping=aes(x=tmax,y=rainfall,
+                                     group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Mean Daily Maximum Temperature(degC)", y="Total Rainfall(mm)",
+       title="Daily Maximum Temperature vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 10))
+
+#tmin  and rainfall
+p3<-ggplot(data=Paisley,mapping=aes(x=tmin,y=rainfall,group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Mean Daily Minimum Temperature (degC)", y="Total Rainfall(mm)",
+       title="Daily Minimum Temperature vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 10))
+
+#air frost and rainfall
+p4<-ggplot(data=Paisley,mapping=aes(x=af,y=rainfall,group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Days of Air Frost (days)", y="Total Rainfall(mm)",
+       title="Days of Air Frost vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 10))
+
+# mix the graphs
+grid.arrange(p1,p2,p3,p4)
+
+```
 
 ### Variable Selection
 Our approach is using confidence intervals.
@@ -100,31 +138,39 @@ while the regression line for the month in the latter half year is given by:$$\w
 To see the linear relationship between four variables, we plot scatterplots:
 
 ```{r}
-ggplot(Paisley, aes(x = af, y = rainfall, color = half_year)) +
-  geom_point() +
-  labs(x = "af", y = "Rainfall", color = "half_year") +
+ggplot(data=Paisley,mapping=aes(x=af,y=rainfall,group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Days of Air Frost (days)", y="Total Rainfall(mm)",
+       title="Days of Air Frost vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 13))+
   geom_smooth(method = "lm", se = FALSE)
 
-ggplot(Paisley, aes(x = sun, y = rainfall, color = half_year)) +
-  geom_point() +
-  labs(x = "sun", y = "Rainfall", color = "half_year") +
+
+ggplot(data=Paisley,mapping=aes(x=sun,y=rainfall,
+                                group=half_year,color=half_year))+
+  geom_point(alpha=0.6)+
+  labs(x="Total Sunshine Duration(hours)", y="Total Rainfall(mm)",
+       title="Sunshine Duration vs Rainfall")+
+  theme(plot.title = element_text(colour = "black", face = "bold",size = 13))+
   geom_smooth(method = "lm", se = FALSE)
+  
 ```
 
 ## Assessing Model fit
 We have to check our model assumptions.
 First, we need to plot the scatterplot of the residuals against credit af and sun:
+
 ```{r}
 regression.points<-get_regression_points(int.model)
 ggplot(regression.points, aes(x = af, y = residual)) +
-  geom_point() +
-  labs(x = "af(days)", y = "Residual", title = "Residuals vs af")  +
+  geom_point(alpha=0.6) +
+  labs(x = "Days of Air Frost(days)", y = "Residual", title = "Residuals vs Days of Air Frost")  +
   geom_hline(yintercept = 0, col = "blue", size = 1)+
   facet_wrap(~ half_year)
 
 ggplot(regression.points, aes(x = sun, y = residual)) +
   geom_point() +
-  labs(x = "sun(hours)", y = "Residual", title = "Residuals vs sun")  +
+  labs(x = "Total Sunshine Duration(hours)", y = "Residual", title = "Residuals vs Total Sunshine Duration")  +
   geom_hline(yintercept = 0, col = "blue", size = 1)+
   facet_wrap(~ half_year)
 ```
@@ -135,8 +181,8 @@ Then we plot the residuals against the fitted values:
 
 ```{r}
 ggplot(regression.points, aes(x = rainfall, y = residual)) +
-  geom_point() +
-  labs(x = "Fitted values", y = "Residual") +
+  geom_point(alpha=0.6) +
+  labs(x = "Fitted Values", y = "Residual",title="Residuals vs Fitted Values") +
   geom_hline(yintercept = 0, col = "blue", size = 1) +
   facet_wrap(~ half_year)
 ```
@@ -160,15 +206,17 @@ CIs have been shown in Table \ref{tab:model}.
 ## Futher Expansion
 As the variable tmax and tmin have very weak linear relationship with Rainfall, we want to find if there is a linear relationship between rainfall and the new variable td(temperature difference) produced by tmax and tmin.
 We can see the data and fitted model.
+
 ```{r}
 new_data <- Paisley%>%
   mutate(td=tmax-tmin)
 ggplot(new_data, aes(x = td, y = rainfall)) +
   geom_jitter() +
-  labs(x = "td(degC)", y = "rainfall(mm)") +
+  labs(x = "Temperature Difference(degC)", y = "Total rainfall(mm)",title="Temperature Difference vs Total Rainfall") +
   geom_smooth(method = "lm", se = FALSE)
 ```
 We estimate the sampling distribution of the slope parameter $\hat{\beta}$ via the bootstrap method. And here we can view the bootstrap distribution as a histogram.
+
 ```{r}
 bootstrap_beta_distn <- new_data %>% 
   specify(rainfall ~ td) %>%
