@@ -30,7 +30,21 @@ Paisley<-read.csv("Group_12.csv")
 
 ## Introduction
 
-## summary
+There are historic weather stations around the United Kingdom, which collects monthly data about the weather forecast in their location. We have selected data from weather station from Paisley, Glasgow and we have taken a subset of all the months between 1959 to 1999. [1]
+
+The variables that are measured by the station are: mean daily maximum temperature (degree Celsius), mean daily minimum temperature (degree Celsius), air frost (days), total rainfall (millimetres), and total sunshine duration (hours). The values are recorded each month of the year.
+
+We will be exploring if we can predict the total rainfall using the other measured variables. The total rainfall within the area is an important factor in range of areas, for example gives insight into Paisley’s ecology or even benefitable for the council to prepare for adverse weather conditions. [2]
+
+Additionally, we are interested in seeing if there is a significant difference between the total rainfall in the first half of the year and the second half. This leads us to create a categorical variable, which allows us to compare the first and last 6 months of each year.
+
+Using the observations recorded each month, we will apply linear regression to create a model to predict the total rainfall within Paisley. Furthermore, we shall use numerical summaries and visual plots to compare the first and second halves of the year.
+
+[1] MetOffice UK, 2021, Historic station data, viewed 29 June 2021, https://www.metoffice.gov.uk/research/climate/maps-and-data/historic-station-data
+
+[2] Schultz, C 2011, ‘Rainfall: State of the Science’, AGU Geophysical Monograph Series, vol. 92, no. 43, pp. 378
+
+## Summary
 
 ## Model Selection
 The data set has five continuous variables and one categorical variable, so I'll choose suitable continuous variables as explanatory variable at first as rainfall has been the response variable.
