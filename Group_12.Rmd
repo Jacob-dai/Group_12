@@ -26,6 +26,7 @@ library(tidyverse)
 
 ```{r data, echo = FALSE, eval = TRUE}
 Paisley<-read.csv("Group_12.csv")
+
 ```
 
 ## Introduction
@@ -44,7 +45,55 @@ Using the observations recorded each month, we will apply linear regression to c
 
 [2] Schultz, C 2011, ‘Rainfall: State of the Science’, AGU Geophysical Monograph Series, vol. 92, no. 43, pp. 378
 
-## Summary
+## Numerical Summaries
+
+```{r}
+#Rainfall vs Halves of year boxplot
+bp0 <- ggplot(data=Paisley,mapping=aes(x=half_year,y=rainfall,fill=half_year))+
+  geom_boxplot(alpha=0.6)+ labs(x="Halves of year", y="Total Rainfall (mm)") + scale_x_discrete(labels = c("First", "Last")) + theme(axis.title.y = element_text(size=6), axis.title.x = element_text(size=7),legend.position = "none")
+
+#Maximum Temperature vs Halves of year boxplot
+bp1 <- ggplot(data=Paisley,mapping=aes(x=half_year,y=tmax,fill=half_year))+
+  geom_boxplot(alpha=0.6)+ labs(x="Halves of year", y="Maximum Temperature (Celsius)") + scale_x_discrete(labels = c("First", "Last"))+ 
+  theme(axis.title.y = element_text(size=4.5), axis.title.x = element_text(size=7),legend.position = "none")
+
+#Minimum Temperature vs Halves of year boxplot
+bp2 <- ggplot(data=Paisley,mapping=aes(x=half_year,y=tmin,fill=half_year))+
+  geom_boxplot(alpha=0.6)+ labs(x="Halves of year", y="Minimum Temperature (Celsius)") + scale_x_discrete(labels = c("First", "Last")) + 
+  theme(axis.title.y = element_text(size=6), axis.title.x = element_text(size=7),legend.position = "none")
+
+#Air Frost vs Halves of year boxplot
+bp3 <- ggplot(data=Paisley,mapping=aes(x=half_year,y=af,fill=half_year))+
+  geom_boxplot(alpha=0.6)+ labs(x="Halves of year", y="Air Frost (days)") + scale_x_discrete(labels = c("First", "Last"))+ 
+  theme(axis.title.y = element_text(size=6), axis.title.x = element_text(size=7),legend.position = "none")
+
+#Total Sunshine Duration vs Halves of year boxplot
+bp4 <- ggplot(data=Paisley,mapping=aes(x=half_year,y=sun,fill=half_year))+
+  geom_boxplot(alpha=0.6)+ labs(x="Halves of year", y="Total Sunshine Duration (hours)") + scale_x_discrete(labels = c("First", "Last")) + 
+  theme(axis.title.y = element_text(size=6), axis.title.x = element_text(size=7),legend.position = "none")
+
+# arrange the boxplots
+grid.arrange(bp0,bp1,bp2,bp3,bp4,top="Boxplots of comparing First and Last half of the year for each variable.") 
+```
+
+```{r}
+#Apply wilcoxon signed rank test on all the variables, and get their p-value
+p = NULL
+for(f in names(Paisley)[-1]){
+p <- c(p,wilcox.test(Paisley[[f]]~Paisley$half_year,mu=0,paired=T)$p.value)
+}
+
+#Create table
+cbind(c("Max temperature","Min temperature","Air frost","Total rainfall","Total sunshine duration"),p) %>% `colnames<-`(c('Variable Name','P-Value')) %>%
+  knitr::kable(
+    digits = 3,
+    caption = "\\label{tab:comp} P-values from Wilcoxon's Signed Ranks test (paired data)",
+    booktabs = TRUE)%>%
+  kable_styling(latex_options = "hold_position")
+```
+
+[Draft] what do boxplots shows and why use them? comparison and distribution.
+The data is paired so apply Wilcoxon signed rank test, we use mu=0 and see if sig difference between each one by calc pvalues. As we can see, all variables median have stat sig difference between first and last of the year. [make sure to lay out mathematically]
 
 ## Model Selection
 The data set has five continuous variables and one categorical variable, so I'll choose suitable continuous variables as explanatory variable at first as rainfall has been the response variable.
