@@ -37,9 +37,9 @@ The variables that are measured by the station are: mean daily maximum temperatu
 
 We will be exploring if we can predict the total rainfall using the other measured variables. The total rainfall within the area is an important factor in range of areas, for example gives insight into Paisley’s ecology or even benefitable for the council to prepare for adverse weather conditions. [2]
 
-Additionally, we are interested in seeing if there is a significant difference between the total rainfall in the first half of the year and the second half. This leads us to create a categorical variable, which allows us to compare the first and last 6 months of each year.
+Additionally, we are interested in seeing if there is a significant linear relationship between the total rainfall and other potential variable. We found that there is weak linear relationship between the total rainfall and mean daily maximum(minimum) temperature. So it is an interesting question that if the temperature difference(degree Celsius) produced by mean daily maximum(minimum) temperature is a significant variable.
 
-Using the observations recorded each month, we will apply linear regression to create a model to predict the total rainfall within Paisley. Furthermore, we shall use numerical summaries and visual plots to compare the first and second halves of the year.
+Using the observations recorded each month, we will apply linear regression to create a model to predict the total rainfall within Paisley. Furthermore, we shall use bootstrap method to find the linear relationship between the total rainfall and temperature difference.
 
 [1] MetOffice UK, 2021, Historic station data, viewed 29 June 2021, https://www.metoffice.gov.uk/research/climate/maps-and-data/historic-station-data
 
